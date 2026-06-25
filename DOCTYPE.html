@@ -1551,7 +1551,7 @@ function updateStrumDisplay() {
     }
 }
 
-function playStrumClick() {
+function playStrumClick(isAccent) {
     if (!soundEnabled) return;
     try {
         if (!strumAudioCtx) {
@@ -1565,8 +1565,9 @@ function playStrumClick() {
         const gain = strumAudioCtx.createGain();
         osc.connect(gain);
         gain.connect(strumAudioCtx.destination);
-        osc.frequency.value = 720;
-        gain.gain.value = 0.2;
+        // 重拍：高音 + 大音量；普通拍：低音 + 小音量
+        osc.frequency.value = isAccent ? 880 : 660;
+        gain.gain.value = isAccent ? 0.30 : 0.15;
         osc.start();
         osc.stop(strumAudioCtx.currentTime + 0.06);
         gain.gain.exponentialRampToValueAtTime(0.001, strumAudioCtx.currentTime + 0.06);
