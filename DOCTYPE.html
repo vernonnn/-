@@ -1561,16 +1561,38 @@ function playStrumClick(isAccent) {
         if (strumAudioCtx.state === 'suspended') {
             strumAudioCtx.resume();
         }
-        const osc = strumAudioCtx.createOscillator();
-        const gain = strumAudioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(strumAudioCtx.destination);
-        // 重拍：高音 + 大音量；普通拍：低音 + 小音量
-        osc.frequency.value = isAccent ? 880 : 660;
-        gain.gain.value = isAccent ? 0.30 : 0.15;
-        osc.start();
-        osc.stop(strumAudioCtx.currentTime + 0.06);
-        gain.gain.exponentialRampToValueAtTime(0.001, strumAudioCtx.currentTime + 0.06);
+
+        // 重拍（第1拍）：清脆的方波
+        if (isAccent) {
+            const osc = strumAudioCtx.createOscillator();
+            const gain = strumAudioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(strumAudioCtx.destination);
+            
+            // 方波 = 清脆、明亮
+            osc.type = 'square';
+            osc.frequency.value = 1000;
+            gain.gain.setValueAtTime(0.35, strumAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, strumAudioCtx.currentTime + 0.04);
+            
+            osc.start();
+            osc.stop(strumAudioCtx.currentTime + 0.04);
+        } 
+        // 弱拍（2~4拍）：柔和的纯音
+        else {
+            const osc = strumAudioCtx.createOscillator();
+            const gain = strumAudioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(strumAudioCtx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.value = 660;
+            gain.gain.setValueAtTime(0.15, strumAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, strumAudioCtx.currentTime + 0.06);
+            
+            osc.start();
+            osc.stop(strumAudioCtx.currentTime + 0.06);
+        }
     } catch (e) { /* ignore */ }
 }
 
