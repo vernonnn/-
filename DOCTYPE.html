@@ -1310,25 +1310,32 @@ function renderChordBox(diagramStr, chordName, label = '') {
     });
     let startFret = 0;
     if (maxFret > 4 && minFret < 999) {
-        startFret = Math.max(0, minFret - 1); 
+        startFret = Math.max(0, minFret - 1);
         if (maxFret - startFret < 3) startFret = Math.max(0, maxFret - 3);
     }
     const fretCount = Math.max(3, Math.min(6, maxFret - startFret + 3));
     let lines = [];
+    // 不再显示顶部的和弦名和把位
+    
     for (let f = 0; f < fretCount; f++) {
         const fretNum = startFret + f;
         let line = '';
-        if (fretNum === 0) line += '  ';
-        else if (f === 0 && startFret > 0) line += String(fretNum).padStart(2, ' ');
-        else line += '  ';
+        if (fretNum === 0) {
+            line += '  ';
+        } else if (f === 0 && startFret > 0) {
+            line += String(fretNum).padStart(2, ' ');
+        } else {
+            line += '  ';
+        }
         line += ' ';
         for (let s = 0; s < 6; s++) {
             const ch = chars[s] || ' ';
             if (fretNum === 0) {
-                if (ch === 'x') line += '✕ ';
-                else if (ch === '0') line += '○ ';
+                // 不显示 x 和 o，只用空格代替
+                if (ch === 'x') line += '  ';
+                else if (ch === '0') line += '  ';
                 else if (!isNaN(parseInt(ch)) && parseInt(ch) > 0) line += '● ';
-                else line += '│ ';
+                else line += '  ';
             } else {
                 const num = parseInt(ch);
                 if (!isNaN(num) && num === fretNum) line += '● ';
@@ -1374,7 +1381,6 @@ function loadChords() {
                 <div class="chord-diagram-wrapper">
                     <pre class="chord-diagram">${diagram}</pre>
                 </div>
-                <div class="chord-diagram-label">${pos.label || '开放把位'}</div>
             </div>
         `;
     });
