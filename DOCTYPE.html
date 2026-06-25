@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>吉他工具 Pro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(145deg, #1e2b3c 0%, #0f1722 100%);
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 24px 28px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .card-title {
+            text-align: center;
+            font-weight: 400;
+            font-size: 1rem;
+            letter-spacing: 4px;
+            color: #b6c8e0;
+            margin: 0 0 12px 0;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cfdefa;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: #2f4b70; border-color: #5a7fb0; color: white; }
+        .btn-primary:active { background: #1a3a5a; }
+        .btn-danger { background: #7f4a3a; border-color: #c07a5a; color: white; }
+        .btn-success { background: #2f6b4a; border-color: #5aaf7a; color: white; }
+        .btn-back {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #9bb1d1;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .page-header .title {
+            color: #e0edff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        /* ===== 菜单 ===== */
+        .menu-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            gap: 20px;
+        }
+        .menu-icon {
+            font-size: 4.5rem;
+            display: block;
+            line-height: 1.2;
+            filter: drop-shadow(0 0 30px rgba(245, 200, 66, 0.1));
+        }
+        .menu-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(to bottom, #f0f7ff, #b6cbe6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 20px rgba(0, 20, 40, 0.6);
+            letter-spacing: 2px;
+        }
+        .menu-subtitle {
+            color: #7a8fb0;
+            font-size: 1rem;
+            letter-spacing: 6px;
+            opacity: 0.6;
+            margin-top: -6px;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 10px;
+        }
+        .menu-item {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 28px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.4);
+        }
+        .menu-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(95, 142, 208, 0.3);
+            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.6);
+        }
+        .menu-item:active { transform: scale(0.96); }
+        .menu-item .icon { font-size: 2.6rem; display: block; margin-bottom: 10px; }
+        .menu-item .name { color: #e0edff; font-size: 1.1rem; font-weight: 600; }
+        .menu-item .desc { color: #7a8fb0; font-size: 0.75rem; margin-top: 6px; opacity: 0.7; }
+
+        /* ===== 节拍器 ===== */
+        .metronome-card { max-width: 560px; margin: 0 auto; width: 100%; }
+        .bpm-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            color: #eef5ff;
+            margin: 6px 0 4px 0;
+        }
+        .bpm-number {
+            font-size: 4.8rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(to bottom, #f0f7ff, #b6cbe6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 12px rgba(0, 20, 40, 0.6);
+            letter-spacing: -2px;
+            min-width: 120px;
+            text-align: center;
+        }
+        .bpm-label {
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: #94a9c9;
+            margin-left: 4px;
+        }
+        .bpm-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cfdefa;
+            font-size: 1.8rem;
+            font-weight: 300;
+            width: 56px;
+            height: 56px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.12s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .bpm-btn:active { transform: scale(0.90); background: rgba(255, 255, 255, 0.14); }
+        .slider-container { margin: 12px 0 18px 0; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #2a3b55, #6d8fc9);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #d6e6ff, #7b9ed7);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(90, 140, 220, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .beat-indicator-wrapper {
+            min-height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 14px 0 18px 0;
+        }
+        .beat-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .beat-light {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #1a2a3a;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+            transition: all 0.08s ease;
+            border: 2px solid #2a3a52;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #2a3a52;
+        }
+        .beat-light .number { transition: all 0.08s ease; }
+        .beat-light.active { border-color: #f5c542; box-shadow: 0 0 25px rgba(245, 200, 66, 0.3); background: #2a2a3a; }
+        .beat-light.active .number { color: #f5c542; transform: scale(1.15); }
+        .beat-light.accent { border-color: #ff6b6b; box-shadow: 0 0 35px rgba(255, 107, 107, 0.35); background: #2a1a1a; }
+        .beat-light.accent .number { color: #ff6b6b; transform: scale(1.2); }
+        .beat-light.sub-dot { width: 28px; height: 28px; border-color: #1a2a3a; background: #0a0a18; font-size: 0.6rem; }
+        .beat-light.sub-dot .number { color: #2a3a4a; font-size: 0.6rem; }
+        .beat-light.sub-dot.active { border-color: #6a6a8a; box-shadow: 0 0 15px rgba(138, 138, 170, 0.15); background: #1a1a2a; }
+        .beat-light.sub-dot.active .number { color: #8a8aaa; transform: scale(1.1); }
+        .beat-light.inactive .number { color: #1a2a3a; }
+
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 10px 0 14px 0;
+        }
+        .ctrl-btn {
+            background: rgba(20, 30, 48, 0.7);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #cfdefa;
+            font-size: 1.4rem;
+            padding: 12px 28px;
+            min-width: 100px;
+            border-radius: 80px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 8px 16px -6px rgba(0, 0, 0, 0.5);
+        }
+        .ctrl-btn:active { transform: scale(0.92); background: rgba(60, 90, 140, 0.5); }
+        .ctrl-btn.play-btn { background: #2f4b70; border-color: #5a7fb0; color: white; }
+        .ctrl-btn.play-btn.playing { background: #7f4a3a; border-color: #c07a5a; }
+
+        .dual-settings {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 10px 0 4px 0;
+            flex-wrap: wrap;
+        }
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .setting-group-label {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: #7a8fb0;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+        .setting-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .sub-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #9bb1d1;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.12s;
+            min-width: 48px;
+            text-align: center;
+        }
+        .sub-btn:active { background: rgba(255, 255, 255, 0.06); }
+        .sub-btn.active-setting {
+            background: rgba(70, 120, 200, 0.25);
+            border-color: #5f8ed0;
+            color: #e0edff;
+            box-shadow: 0 0 12px rgba(70, 130, 220, 0.15);
+        }
+        .footer-meta {
+            text-align: center;
+            color: #5d7397;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            margin-top: 12px;
+            opacity: 0.5;
+        }
+
+        /* ===== 和弦查询 ===== */
+        .chord-search {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+        .chord-search label {
+            color: #9bb1d1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .chord-search select {
+            padding: 10px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.3);
+            color: #e0edff;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            min-width: 80px;
+        }
+        .chord-search select:focus { border-color: #5f8ed0; }
+        .chord-search select option { background: #1a2a3a; }
+
+        .chord-scale-header {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .chord-scale-header .item {
+            text-align: center;
+            min-width: 40px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .chord-scale-header .item .degree {
+            font-size: 0.55rem;
+            color: #5d7397;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .chord-scale-header .item .chord-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #f5c842;
+            padding: 2px 4px;
+        }
+
+        .chord-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+        }
+        .chord-card {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 14px;
+            padding: 12px 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: 0.15s;
+        }
+        .chord-card:hover {
+            border-color: rgba(245, 200, 66, 0.15);
+            background: rgba(0, 0, 0, 0.45);
+        }
+        .chord-card .chord-card-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .chord-card .chord-card-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f5c842;
+        }
+        .chord-card .chord-card-degree {
+            font-size: 0.65rem;
+            color: #7a8fb0;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .chord-diagram-wrapper {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 8px 10px;
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .chord-diagram {
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #b8d0ff;
+            text-align: left;
+            display: inline-block;
+            min-width: 150px;
+            margin: 0;
+        }
+        .chord-diagram .dot { color: #f5c842; font-weight: 700; }
+        .chord-diagram .mute { color: #e05a5a; font-weight: 700; }
+        .chord-diagram .open { color: #6ac8ff; font-weight: 700; }
+
+        .chord-diagram-label {
+            font-size: 0.6rem;
+            color: #4a5a7a;
+            margin-top: 4px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .footer-note {
+            color: #5d7397;
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 14px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            opacity: 0.6;
+        }
+        .footer-note span { display: inline-flex; align-items: center; gap: 4px; }
+        .dot-legend { color: #f5c842; font-weight: 700; }
+        .mute-legend { color: #e05a5a; font-weight: 700; }
+        .open-legend { color: #6ac8ff; font-weight: 700; }
+
+        /* ===== 扫弦训练器 ===== */
+        .strum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .strum-header h3 {
+            color: #b6c8e0;
+            font-weight: 400;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        .strum-time-tabs {
+            display: flex;
+            gap: 6px;
+        }
+        .strum-time-tab {
+            padding: 5px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: transparent;
+            color: #9bb1d1;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: 0.15s;
+        }
+        .strum-time-tab:hover { border-color: #5a5a8a; }
+        .strum-time-tab.active {
+            border-color: #5f8ed0;
+            color: #e0edff;
+            background: rgba(70, 120, 200, 0.2);
+        }
+
+        .strum-pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 10px 0 14px;
+        }
+        .strum-pattern-item {
+            padding: 8px 6px;
+            text-align: center;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.8rem;
+            color: #9bb1d1;
+        }
+        .strum-pattern-item:hover { border-color: #4a4a7a; background: rgba(255,255,255,0.05); }
+        .strum-pattern-item.active {
+            border-color: #5f8ed0;
+            color: #e0edff;
+            background: rgba(70, 120, 200, 0.15);
+        }
+        .strum-pattern-item .num {
+            font-size: 0.55rem;
+            color: #5d7397;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .strum-ref-diagram {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 10px 0 14px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            line-height: 2.2;
+            color: #b8d0ff;
+            min-height: 60px;
+        }
+        .strum-ref-diagram .down { color: #f5c842; font-weight: 700; }
+        .strum-ref-diagram .up { color: #6ac8ff; font-weight: 700; }
+        .strum-ref-diagram .both { color: #c8a030; font-weight: 700; }
+        .strum-ref-diagram .highlight {
+            background: rgba(74, 200, 74, 0.2);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 2px solid #4ac84a;
+        }
+
+        .strum-speed-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .strum-speed-section label { color: #7a8fb0; font-size: 0.85rem; }
+        .strum-speed-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e0edff;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 1rem;
+            width: 70px;
+            text-align: center;
+            outline: none;
+        }
+        .strum-speed-input:focus { border-color: #5f8ed0; }
+
+        .strum-sound-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .strum-sound-section label {
+            color: #7a8fb0;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sound-toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: #2a3a4a;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+        }
+        .sound-toggle.active {
+            background: #3a6a4a;
+            border-color: rgba(74, 200, 74, 0.3);
+        }
+        .sound-toggle .slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #6a7a8a;
+            transition: 0.2s;
+        }
+        .sound-toggle.active .slider {
+            left: 24px;
+            background: #6ac86a;
+            box-shadow: 0 0 20px rgba(74, 200, 74, 0.2);
+        }
+        .sound-status {
+            font-size: 0.8rem;
+            color: #6a7fa0;
+            min-width: 40px;
+        }
+        .sound-status.on { color: #6ac86a; }
+        .sound-status.off { color: #6a7a8a; }
+
+        .strum-auto-section {
+            margin: 10px 0;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .strum-auto-section .label {
+            color: #7a8fb0;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        .strum-auto-section .label .highlight-text { color: #4ac84a; font-weight: 600; }
+
+        .strum-beat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin: 6px 0;
+        }
+        .strum-beat-cell {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 8px 6px;
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+            transition: 0.15s;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .strum-beat-cell .beat-label {
+            font-size: 0.65rem;
+            color: #5d7397;
+            margin-bottom: 2px;
+        }
+        .strum-beat-cell .strum-dir {
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .strum-beat-cell .strum-dir.down { color: #f5c842; }
+        .strum-beat-cell .strum-dir.up { color: #6ac8ff; }
+        .strum-beat-cell .strum-dir.both { color: #c8a030; }
+        .strum-beat-cell.active {
+            border-color: #4ac84a;
+            box-shadow: 0 0 25px rgba(74, 200, 74, 0.2);
+            background: rgba(74, 200, 74, 0.08);
+        }
+        .strum-beat-cell.active .beat-label { color: #4ac84a; }
+
+        .strum-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            align-items: center;
+        }
+        .strum-current-pattern {
+            color: #f5c842;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 4px 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 0; }
+            .card { padding: 16px 14px; border-radius: 28px; }
+            .bpm-number { font-size: 3.6rem; min-width: 80px; }
+            .bpm-btn { width: 48px; height: 48px; font-size: 1.6rem; }
+            .beat-light { width: 36px; height: 36px; font-size: 0.9rem; }
+            .beat-light.sub-dot { width: 22px; height: 22px; }
+            .beat-indicator { gap: 10px; }
+            .ctrl-btn { min-width: 80px; padding: 10px 16px; font-size: 1.2rem; }
+            .dual-settings { gap: 16px; }
+            .chord-results { grid-template-columns: 1fr 1fr; }
+            .chord-scale-header { gap: 6px; padding: 8px 10px; }
+            .chord-scale-header .item { min-width: 30px; padding: 2px 4px; }
+            .chord-scale-header .item .chord-name { font-size: 0.75rem; }
+            .chord-diagram { font-size: 0.75rem; min-width: 120px; }
+            .strum-beat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .strum-pattern-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+            .menu-title { font-size: 2rem; }
+            .menu-grid { grid-template-columns: 1fr; }
+            .menu-icon { font-size: 3.5rem; }
+            .sound-toggle { width: 40px; height: 22px; }
+            .sound-toggle .slider { width: 16px; height: 16px; }
+            .sound-toggle.active .slider { left: 20px; }
+        }
+        @media (max-width: 400px) {
+            .chord-results { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+
+    <!-- ===== 菜单 ===== -->
+    <div class="page active" id="menuPage">
+        <div class="menu-page">
+            <span class="menu-icon">🎸</span>
+            <div class="menu-title">吉他工具 Pro</div>
+            <div class="menu-subtitle">SELECT A TOOL</div>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="navigateTo('metronome')">
+                    <span class="icon">⏱️</span>
+                    <div class="name">节拍器</div>
+                    <div class="desc">精准节拍 · 数字指示</div>
+                </div>
+                <div class="menu-item" onclick="navigateTo('chord')">
+                    <span class="icon">🎵</span>
+                    <div class="name">和弦查询</div>
+                    <div class="desc">调式级数 · 全部显示</div>
+                </div>
+                <div class="menu-item" onclick="navigateTo('strum')">
+                    <span class="icon">🎸</span>
+                    <div class="name">扫弦训练器</div>
+                    <div class="desc">进阶节奏 · 自定义BPM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 节拍器 ===== -->
+    <div class="page" id="metronomePage">
+        <div class="page-header">
+            <button class="btn-back" onclick="navigateTo('menu')">← 返回</button>
+            <span class="title">⏱️ 节拍器</span>
+        </div>
+        <div class="card metronome-card">
+            <div class="bpm-display">
+                <button class="bpm-btn" id="bpmMinus">−</button>
+                <span class="bpm-number" id="bpmValue">70</span>
+                <button class="bpm-btn" id="bpmPlus">+</button>
+                <span class="bpm-label">BPM</span>
+            </div>
+            <div class="slider-container">
+                <input type="range" id="bpmSlider" min="30" max="240" value="70" step="1">
+            </div>
+            <div class="beat-indicator-wrapper">
+                <div class="beat-indicator" id="beatIndicator"></div>
+            </div>
+            <div class="controls-row">
+                <button class="ctrl-btn play-btn" id="playBtn">▶ 启动</button>
+            </div>
+            <div class="dual-settings">
+                <div class="setting-group">
+                    <span class="setting-group-label">拍号</span>
+                    <div class="setting-buttons" id="beatButtons">
+                        <button class="sub-btn active-setting" data-beat="4">4/4</button>
+                        <button class="sub-btn" data-beat="2">2/4</button>
+                        <button class="sub-btn" data-beat="6">6/8</button>
+                        <button class="sub-btn" data-beat="3">3/4</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <span class="setting-group-label">节奏细分</span>
+                    <div class="setting-buttons" id="subdivButtons">
+                        <button class="sub-btn active-setting" data-subdiv="4">4分</button>
+                        <button class="sub-btn" data-subdiv="8">8分</button>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-meta">♩ 重音在第一拍 · 数字随拍子变亮</div>
+        </div>
+    </div>
+
+    <!-- ===== 和弦查询 ===== -->
+    <div class="page" id="chordPage">
+        <div class="page-header">
+            <button class="btn-back" onclick="navigateTo('menu')">← 返回</button>
+            <span class="title">🎵 和弦查询 · 调式级数</span>
+        </div>
+        <div class="card">
+            <div class="chord-search">
+                <label for="keySelect">选择调式：</label>
+                <select id="keySelect">
+                    <option value="C">C 调</option>
+                    <option value="D">D 调</option>
+                    <option value="E">E 调</option>
+                    <option value="F">F 调</option>
+                    <option value="G">G 调</option>
+                    <option value="A">A 调</option>
+                    <option value="B">B 调</option>
+                </select>
+                <button class="btn btn-primary" id="chordSearchBtn">查询</button>
+            </div>
+
+            <div id="chordScaleHeader" class="chord-scale-header"></div>
+            <div class="chord-results" id="chordResults"></div>
+
+            <div class="footer-note">
+                <span><span class="dot-legend">●</span> 按弦</span>
+                <span><span class="mute-legend">✕</span> 不弹</span>
+                <span><span class="open-legend">○</span> 空弦</span>
+                <span>| 左→右: 6→1弦</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 扫弦训练器（修复版） ===== -->
+    <div class="page" id="strumPage">
+        <div class="page-header">
+            <button class="btn-back" onclick="navigateTo('menu')">← 返回</button>
+            <span class="title">🎸 扫弦进阶训练器</span>
+        </div>
+        <div class="card">
+            <div class="strum-header">
+                <h3>📋 4/4 拍进阶节奏型</h3>
+                <div class="strum-time-tabs">
+                    <button class="strum-time-tab active" data-time="4">4/4 拍</button>
+                </div>
+            </div>
+
+            <div class="strum-pattern-grid" id="strumPatternGrid"></div>
+
+            <div class="strum-ref-diagram" id="strumRefDiagram">
+                <span class="down">⬇</span> <span class="up">⬆</span> <span class="down">⬇</span> <span class="up">⬆</span>
+                <span style="color:#5d7397;font-size:0.75rem;margin-left:10px;">▼ 参考节奏图</span>
+            </div>
+
+            <div class="strum-speed-section">
+                <label>自定义 BPM</label>
+                <input type="number" class="strum-speed-input" id="strumSpeedInput" value="70" min="30" max="240" />
+                <span style="color:#5d7397;font-size:0.85rem;">拍/分</span>
+                <button class="btn btn-primary" id="strumSpeedApplyBtn" style="padding:6px 18px;font-size:0.85rem;">应用</button>
+            </div>
+
+            <!-- 声音开关 -->
+            <div class="strum-sound-section">
+                <label>🔊 声音</label>
+                <div class="sound-toggle active" id="soundToggle">
+                    <div class="slider"></div>
+                </div>
+                <span class="sound-status on" id="soundStatus">开启</span>
+            </div>
+
+            <div class="strum-auto-section">
+                <div class="label">
+                    🎯 手动切换节奏型 · 点击上方切换
+                    <span style="margin-left:12px;" class="highlight-text">绿框走到哪一格，右手就做哪一格</span>
+                </div>
+                <div class="strum-beat-grid time-4" id="strumBeatGrid"></div>
+            </div>
+
+            <div class="strum-controls">
+                <button class="btn btn-success" id="strumStartBtn">▶ 开始</button>
+                <button class="btn btn-danger" id="strumStopBtn">■ 停止</button>
+                <span class="strum-current-pattern" id="strumCurrentPattern">常用节奏型 1</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// 页面导航
+// ============================================================
+function navigateTo(page) {
+    if (page === 'menu') {
+        if (window.metroStop) window.metroStop();
+        if (window.strumStop) window.strumStop();
+        if (window.metroCtx && window.metroCtx.state !== 'closed') {
+            try { window.metroCtx.close(); } catch(e) {}
+            window.metroCtx = null;
+        }
+        if (window.strumCtx && window.strumCtx.state !== 'closed') {
+            try { window.strumCtx.close(); } catch(e) {}
+            window.strumCtx = null;
+        }
+    }
+
+    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+    if (page === 'menu') {
+        document.getElementById('menuPage').classList.add('active');
+    } else if (page === 'metronome') {
+        document.getElementById('metronomePage').classList.add('active');
+        initMetronome();
+    } else if (page === 'chord') {
+        document.getElementById('chordPage').classList.add('active');
+        loadChords();
+    } else if (page === 'strum') {
+        document.getElementById('strumPage').classList.add('active');
+        initStrumTrainer();
+    }
+}
+
+// ============================================================
+// 1. 节拍器
+// ============================================================
+let metroInitialized = false;
+let metroCtx = null;
+
+function initMetronome() {
+    if (metroInitialized) return;
+    metroInitialized = true;
+
+    const bpmSlider = document.getElementById('bpmSlider');
+    const bpmValue = document.getElementById('bpmValue');
+    const playBtn = document.getElementById('playBtn');
+    const bpmPlus = document.getElementById('bpmPlus');
+    const bpmMinus = document.getElementById('bpmMinus');
+    const beatIndicator = document.getElementById('beatIndicator');
+
+    const beatBtnContainer = document.getElementById('beatButtons');
+    const beatButtons = beatBtnContainer.querySelectorAll('.sub-btn');
+    const subdivContainer = document.getElementById('subdivButtons');
+    const subdivButtons = subdivContainer.querySelectorAll('.sub-btn');
+
+    let currentBPM = 70;
+    let isPlaying = false;
+    let beatCount = 4;
+    let subdivision = 4;
+    let currentBeat = 0;
+    let intervalId = null;
+    let audioCtx = null;
+    window.metroCtx = audioCtx;
+
+    function getDisplayDots() {
+        return subdivision === 4 ? beatCount : beatCount * 2;
+    }
+
+    function renderBeatLights() {
+        const total = getDisplayDots();
+        beatIndicator.innerHTML = '';
+        const isSubdivision = (subdivision === 8);
+
+        for (let i = 0; i < total; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'beat-light';
+
+            let isSub = false;
+            let mainIndex = i;
+            if (isSubdivision) {
+                isSub = (i % 2 !== 0);
+                mainIndex = Math.floor(i / 2);
+            }
+
+            if (isSub) {
+                dot.classList.add('sub-dot');
+            } else {
+                if (mainIndex === 0) dot.classList.add('accent');
+            }
+
+            const numSpan = document.createElement('span');
+            numSpan.className = 'number';
+            numSpan.textContent = isSub ? '·' : (mainIndex + 1);
+            dot.appendChild(numSpan);
+
+            beatIndicator.appendChild(dot);
+        }
+
+        if (!isPlaying) {
+            beatIndicator.querySelectorAll('.beat-light').forEach(el => {
+                el.classList.remove('active', 'accent', 'inactive');
+            });
+        }
+    }
+
+    function getLights() {
+        return Array.from(beatIndicator.querySelectorAll('.beat-light'));
+    }
+
+    function playTick(isAccent = false) {
+        try {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                window.metroCtx = audioCtx;
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            const freq = isAccent ? 1200 : 880;
+            const volume = isAccent ? 0.35 : 0.22;
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+        } catch (e) { /* ignore */ }
+    }
+
+    function fireBeat(beatIndex) {
+        const total = getDisplayDots();
+        const lights = getLights();
+
+        lights.forEach(light => {
+            light.classList.remove('active', 'accent', 'inactive');
+        });
+
+        const isSubdivision = (subdivision === 8);
+        let isAccent = false;
+        let mainIndex = beatIndex;
+
+        if (isSubdivision) {
+            const subOffset = beatIndex % 2;
+            mainIndex = Math.floor(beatIndex / 2);
+            isAccent = (mainIndex === 0 && subOffset === 0);
+        } else {
+            mainIndex = beatIndex % beatCount;
+            isAccent = (mainIndex === 0);
+        }
+
+        const lightIndex = beatIndex % total;
+        if (lightIndex < lights.length) {
+            const light = lights[lightIndex];
+            if (isAccent) {
+                light.classList.add('accent');
+            } else {
+                light.classList.add('active');
+            }
+        }
+
+        lights.forEach((light, idx) => {
+            if (idx !== lightIndex) {
+                light.classList.add('inactive');
+            }
+        });
+
+        playTick(isAccent);
+    }
+
+    function stopMetronome() {
+        if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+        isPlaying = false;
+        playBtn.textContent = '▶ 启动';
+        playBtn.classList.remove('playing');
+        getLights().forEach(light => {
+            light.classList.remove('active', 'accent', 'inactive');
+        });
+        currentBeat = 0;
+        if (audioCtx && audioCtx.state !== 'closed') {
+            try { audioCtx.close(); } catch(e) {}
+            audioCtx = null;
+            window.metroCtx = null;
+        }
+    }
+    window.metroStop = stopMetronome;
+
+    function startMetronome() {
+        if (isPlaying) stopMetronome();
+
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            window.metroCtx = audioCtx;
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        renderBeatLights();
+
+        currentBeat = 0;
+        const total = getDisplayDots();
+        fireBeat(0);
+
+        let intervalMs = (60 / currentBPM) * 1000;
+        if (subdivision === 8) {
+            intervalMs = intervalMs / 2;
+        }
+
+        intervalId = setInterval(() => {
+            currentBeat = (currentBeat + 1) % total;
+            fireBeat(currentBeat);
+        }, intervalMs);
+
+        isPlaying = true;
+        playBtn.textContent = '⏹ 停止';
+        playBtn.classList.add('playing');
+    }
+
+    function togglePlay() {
+        if (isPlaying) {
+            stopMetronome();
+        } else {
+            startMetronome();
+        }
+    }
+
+    function updateBPM(newBpm) {
+        newBpm = Math.min(240, Math.max(30, Math.round(newBpm)));
+        if (newBpm === currentBPM) return;
+        currentBPM = newBpm;
+        bpmValue.textContent = currentBPM;
+        bpmSlider.value = currentBPM;
+        if (isPlaying) {
+            stopMetronome();
+            startMetronome();
+        }
+    }
+
+    function setBeatCount(newCount) {
+        if (newCount === beatCount) return;
+        beatCount = newCount;
+        renderBeatLights();
+        if (isPlaying) {
+            stopMetronome();
+            startMetronome();
+        } else {
+            getLights().forEach(light => {
+                light.classList.remove('active', 'accent', 'inactive');
+            });
+        }
+        beatButtons.forEach(btn => {
+            btn.classList.remove('active-setting');
+            if (parseInt(btn.dataset.beat, 10) === newCount) {
+                btn.classList.add('active-setting');
+            }
+        });
+    }
+
+    function setSubdivision(newSub) {
+        if (newSub === subdivision) return;
+        subdivision = newSub;
+        renderBeatLights();
+        if (isPlaying) {
+            stopMetronome();
+            startMetronome();
+        } else {
+            getLights().forEach(light => {
+                light.classList.remove('active', 'accent', 'inactive');
+            });
+        }
+        subdivButtons.forEach(btn => {
+            btn.classList.remove('active-setting');
+            if (parseInt(btn.dataset.subdiv, 10) === newSub) {
+                btn.classList.add('active-setting');
+            }
+        });
+    }
+
+    bpmValue.textContent = '70';
+    bpmSlider.value = '70';
+    currentBPM = 70;
+    beatCount = 4;
+    subdivision = 4;
+    renderBeatLights();
+
+    beatButtons.forEach(btn => {
+        btn.classList.remove('active-setting');
+        if (parseInt(btn.dataset.beat, 10) === 4) btn.classList.add('active-setting');
+    });
+    subdivButtons.forEach(btn => {
+        btn.classList.remove('active-setting');
+        if (parseInt(btn.dataset.subdiv, 10) === 4) btn.classList.add('active-setting');
+    });
+
+    bpmSlider.addEventListener('input', function(e) {
+        updateBPM(parseInt(e.target.value, 10));
+    });
+    bpmPlus.addEventListener('click', () => updateBPM(currentBPM + 1));
+    bpmMinus.addEventListener('click', () => updateBPM(currentBPM - 1));
+    playBtn.addEventListener('click', togglePlay);
+
+    beatButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            setBeatCount(parseInt(this.dataset.beat, 10));
+        });
+    });
+
+    subdivButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            setSubdivision(parseInt(this.dataset.subdiv, 10));
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target === document.body) {
+            e.preventDefault();
+            togglePlay();
+        }
+    });
+}
+
+// ============================================================
+// 2. 和弦查询
+// ============================================================
+const SCALE_CHORDS = {
+    'C': { name: 'C 调', chords: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'G7'], degrees: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] },
+    'D': { name: 'D 调', chords: ['D', 'Em', 'F#m', 'G', 'A', 'Bm', 'A7'], degrees: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] },
+    'E': { name: 'E 调', chords: ['E', 'F#m', 'G#m', 'A', 'B', 'C#m', 'B7'], degrees: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] },
+    'F': { name: 'F 调', chords: ['F', 'Gm', 'Am', 'Bb', 'C', 'Dm', 'C7'], degrees: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] },
+    'G': { name: 'G 调', chords: ['G', 'Am', 'Bm', 'C', 'D', 'Em', 'D7'], degrees: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] },
+    'A': { name: 'A 调', chords: ['A', 'Bm', 'C#m', 'D', 'E', 'F#m', 'E7'], degrees: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] },
+    'B': { name: 'B 调', chords: ['B', 'C#m', 'D#m', 'E', 'F#', 'G#m', 'F#7'], degrees: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] }
+};
+
+const CHORD_FINGERINGS = {
+    'C': [{ diagram: 'x32010', label: '开放' }],
+    'D': [{ diagram: 'xx0232', label: '开放' }],
+    'E': [{ diagram: '022100', label: '开放' }],
+    'F': [{ diagram: '133211', label: '开放' }],
+    'G': [{ diagram: '320003', label: '开放' }],
+    'A': [{ diagram: 'x02220', label: '开放' }],
+    'B': [{ diagram: 'x24442', label: '开放' }],
+    'Dm': [{ diagram: 'xx0231', label: '开放' }],
+    'Em': [{ diagram: '022000', label: '开放' }],
+    'Am': [{ diagram: 'x02210', label: '开放' }],
+    'Bm': [{ diagram: 'x24432', label: '开放' }],
+    'G7': [{ diagram: '320001', label: '开放' }],
+    'A7': [{ diagram: 'x02020', label: '开放' }],
+    'B7': [{ diagram: 'x21202', label: '开放' }],
+    'C7': [{ diagram: 'x32310', label: '开放' }],
+    'D7': [{ diagram: 'xx0212', label: '开放' }],
+    'E7': [{ diagram: '020100', label: '开放' }],
+    'F#m': [{ diagram: '244222', label: '开放' }],
+    'G#m': [{ diagram: '466444', label: '开放' }],
+    'C#m': [{ diagram: 'x46654', label: '开放' }],
+    'F#': [{ diagram: '244322', label: '开放' }],
+    'Bb': [{ diagram: 'x13331', label: '开放' }],
+    'Gm': [{ diagram: '355333', label: '3品' }],
+    'D#m': [{ diagram: 'x68876', label: '开放' }],
+    'F#7': [{ diagram: '242322', label: '开放' }],
+};
+
+function getChordFingerings(chordName) {
+    if (CHORD_FINGERINGS[chordName]) return CHORD_FINGERINGS[chordName];
+    const root = chordName.replace(/[m7#]/g, '').trim();
+    if (CHORD_FINGERINGS[root]) return CHORD_FINGERINGS[root];
+    return [{ diagram: 'x32010', label: '开放' }];
+}
+
+function renderChordBox(diagramStr, chordName, label = '') {
+    if (!diagramStr) return '未找到指法';
+    let chars = diagramStr.split('-');
+    if (chars.length === 1) {
+        chars = diagramStr.padEnd(6, ' ').slice(0, 6).split('');
+    } else {
+        while (chars.length < 6) chars.push(' ');
+        chars = chars.slice(0, 6);
+    }
+    let maxFret = 0, minFret = 999;
+    chars.forEach(ch => {
+        const num = parseInt(ch);
+        if (!isNaN(num) && num > 0 && ch !== 'x' && ch !== '0') {
+            if (num > maxFret) maxFret = num;
+            if (num < minFret) minFret = num;
+        }
+    });
+    let startFret = 0;
+    if (maxFret > 4 && minFret < 999) {
+        startFret = Math.max(0, minFret - 1);
+        if (maxFret - startFret < 3) startFret = Math.max(0, maxFret - 3);
+    }
+    const fretCount = Math.max(3, Math.min(6, maxFret - startFret + 3));
+    let lines = [];
+    lines.push(`  ${chordName}  ${label ? '[' + label + ']' : ''}`);
+    for (let f = 0; f < fretCount; f++) {
+        const fretNum = startFret + f;
+        let line = '';
+        if (fretNum === 0) line += '  ';
+        else if (f === 0 && startFret > 0) line += String(fretNum).padStart(2, ' ');
+        else line += '  ';
+        line += ' ';
+        for (let s = 0; s < 6; s++) {
+            const ch = chars[s] || ' ';
+            if (fretNum === 0) {
+                if (ch === 'x') line += '✕ ';
+                else if (ch === '0') line += '○ ';
+                else if (!isNaN(parseInt(ch)) && parseInt(ch) > 0) line += '● ';
+                else line += '│ ';
+            } else {
+                const num = parseInt(ch);
+                if (!isNaN(num) && num === fretNum) line += '● ';
+                else line += '│ ';
+            }
+        }
+        lines.push(line);
+    }
+    lines.push('   6 5 4 3 2 1');
+    return lines.join('\n');
+}
+
+function loadChords() {
+    const key = document.getElementById('keySelect').value;
+    const scale = SCALE_CHORDS[key];
+    if (!scale) return;
+
+    const header = document.getElementById('chordScaleHeader');
+    const results = document.getElementById('chordResults');
+
+    let headerHtml = '';
+    scale.chords.forEach((chord, idx) => {
+        headerHtml += `
+            <div class="item">
+                <div class="degree">${scale.degrees[idx]}</div>
+                <div class="chord-name">${chord}</div>
+            </div>
+        `;
+    });
+    header.innerHTML = headerHtml;
+
+    let resultsHtml = '';
+    scale.chords.forEach((chord, idx) => {
+        const fingerings = getChordFingerings(chord);
+        const pos = fingerings[0] || { diagram: 'x32010', label: '开放' };
+        const diagram = renderChordBox(pos.diagram, chord, pos.label);
+        resultsHtml += `
+            <div class="chord-card">
+                <div class="chord-card-header">
+                    <span class="chord-card-name">${chord}</span>
+                    <span class="chord-card-degree">${scale.degrees[idx]}</span>
+                </div>
+                <div class="chord-diagram-wrapper">
+                    <pre class="chord-diagram">${diagram}</pre>
+                </div>
+                <div class="chord-diagram-label">${pos.label || '开放把位'}</div>
+            </div>
+        `;
+    });
+    results.innerHTML = resultsHtml;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchBtn = document.getElementById('chordSearchBtn');
+    const keySelect = document.getElementById('keySelect');
+    if (searchBtn) searchBtn.addEventListener('click', loadChords);
+    if (keySelect) keySelect.addEventListener('change', loadChords);
+});
+
+// ============================================================
+// 3. 扫弦训练器 - 彻底修复版
+// ============================================================
+const STRUM_PATTERNS_4 = {
+    '常用1': {
+        name: '常用节奏型 1',
+        beats: 4,
+        pattern: ['⬇', '⬇⬆⬇', '⬇', '⬇⬆⬇'],
+        display: ['四分', '前八后十六', '四分', '前八后十六']
+    },
+    '常用2': {
+        name: '常用节奏型 2',
+        beats: 4,
+        pattern: ['⬇⬇', '⬇⬆⬇', '⬇⬇', '⬇⬆⬇'],
+        display: ['下下', '前八后十六', '下下', '前八后十六']
+    }
+};
+
+let strumRunning = false;
+let strumTimer = null;
+let strumCurrentBeat = 0;
+let strumCurrentPatternIdx = 0;
+let strumSpeed = 70;
+let strumAudioCtx = null;
+let soundEnabled = true;
+window.strumCtx = strumAudioCtx;
+
+const strumPatternGrid = document.getElementById('strumPatternGrid');
+const strumRefDiagram = document.getElementById('strumRefDiagram');
+const strumBeatGrid = document.getElementById('strumBeatGrid');
+const strumStartBtn = document.getElementById('strumStartBtn');
+const strumStopBtn = document.getElementById('strumStopBtn');
+const strumCurrentPattern = document.getElementById('strumCurrentPattern');
+const strumSpeedInput = document.getElementById('strumSpeedInput');
+const strumSpeedApplyBtn = document.getElementById('strumSpeedApplyBtn');
+
+// 声音开关
+const soundToggle = document.getElementById('soundToggle');
+const soundStatus = document.getElementById('soundStatus');
+
+soundToggle.addEventListener('click', function() {
+    soundEnabled = !soundEnabled;
+    this.classList.toggle('active');
+    soundStatus.textContent = soundEnabled ? '开启' : '关闭';
+    soundStatus.className = 'sound-status ' + (soundEnabled ? 'on' : 'off');
+});
+
+function getPatterns() {
+    return STRUM_PATTERNS_4;
+}
+
+function renderPatternGrid() {
+    if (!strumPatternGrid) return;
+    const patterns = getPatterns();
+    const keys = Object.keys(patterns);
+    strumPatternGrid.innerHTML = '';
+    keys.forEach((key, idx) => {
+        const div = document.createElement('div');
+        div.className = 'strum-pattern-item' + (idx === strumCurrentPatternIdx ? ' active' : '');
+        div.innerHTML = `${key} <span class="num">${idx+1}</span>`;
+        div.addEventListener('click', () => {
+            strumCurrentPatternIdx = idx;
+            strumCurrentBeat = 0;
+            renderPatternGrid();
+            if (strumRunning) {
+                clearTimeout(strumTimer);
+                strumRunning = false;
+                strumRunning = true;
+                // 立即显示第1拍并播放
+                renderBeatGrid();
+                renderRefDiagram();
+                if (soundEnabled) playStrumClick();
+                strumTimer = setTimeout(strumScheduler, 60000 / strumSpeed);
+            } else {
+                updateStrumDisplay();
+            }
+        });
+        strumPatternGrid.appendChild(div);
+    });
+}
+
+function renderRefDiagram() {
+    if (!strumRefDiagram) return;
+    const patterns = getPatterns();
+    const keys = Object.keys(patterns);
+    const currentKey = keys[strumCurrentPatternIdx] || keys[0];
+    const pattern = patterns[currentKey];
+    if (!pattern) return;
+    let html = '';
+    pattern.pattern.forEach((item, i) => {
+        const isDown = item.includes('⬇');
+        const isUp = item.includes('⬆');
+        let cls = '';
+        if (isDown && isUp) cls = 'both';
+        else if (isDown) cls = 'down';
+        else if (isUp) cls = 'up';
+        const isActive = (i === strumCurrentBeat % pattern.beats && strumRunning);
+        html += `<span class="${cls}${isActive ? ' highlight' : ''}">${item}</span> `;
+    });
+    html += `<span style="color:#5d7397;font-size:0.75rem;margin-left:10px;">▼ ${pattern.display ? pattern.display.join(' | ') : ''}</span>`;
+    strumRefDiagram.innerHTML = html;
+}
+
+function renderBeatGrid() {
+    if (!strumBeatGrid) return;
+    const patterns = getPatterns();
+    const keys = Object.keys(patterns);
+    const currentKey = keys[strumCurrentPatternIdx] || keys[0];
+    const pattern = patterns[currentKey];
+    if (!pattern) return;
+    const totalBeats = pattern.beats || 4;
+
+    strumBeatGrid.className = 'strum-beat-grid time-4';
+    strumBeatGrid.innerHTML = '';
+
+    for (let i = 0; i < totalBeats; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'strum-beat-cell';
+        if (i === strumCurrentBeat % totalBeats && strumRunning) {
+            cell.classList.add('active');
+        }
+
+        const label = document.createElement('div');
+        label.className = 'beat-label';
+        label.textContent = `第${i+1}拍`;
+        cell.appendChild(label);
+
+        const dir = document.createElement('div');
+        const item = pattern.pattern[i] || '⬇';
+        const isDown = item.includes('⬇');
+        const isUp = item.includes('⬆');
+        let cls = 'strum-dir';
+        if (isDown && isUp) cls += ' both';
+        else if (isDown) cls += ' down';
+        else if (isUp) cls += ' up';
+        dir.className = cls;
+        dir.textContent = item;
+        cell.appendChild(dir);
+
+        if (pattern.display && pattern.display[i]) {
+            const sub = document.createElement('div');
+            sub.style.cssText = 'font-size:0.5rem;color:#5d7397;margin-top:2px;';
+            sub.textContent = pattern.display[i];
+            cell.appendChild(sub);
+        }
+
+        strumBeatGrid.appendChild(cell);
+    }
+}
+
+function updateStrumDisplay() {
+    renderRefDiagram();
+    renderBeatGrid();
+    const patterns = getPatterns();
+    const keys = Object.keys(patterns);
+    const currentKey = keys[strumCurrentPatternIdx] || keys[0];
+    const pattern = patterns[currentKey];
+    if (pattern && strumCurrentPattern) {
+        strumCurrentPattern.textContent = pattern.name;
+    }
+}
+
+function playStrumClick() {
+    if (!soundEnabled) return;
+    try {
+        if (!strumAudioCtx) {
+            strumAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            window.strumCtx = strumAudioCtx;
+        }
+        if (strumAudioCtx.state === 'suspended') {
+            strumAudioCtx.resume();
+        }
+        const osc = strumAudioCtx.createOscillator();
+        const gain = strumAudioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(strumAudioCtx.destination);
+        osc.frequency.value = 720;
+        gain.gain.value = 0.2;
+        osc.start();
+        osc.stop(strumAudioCtx.currentTime + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, strumAudioCtx.currentTime + 0.06);
+    } catch (e) { /* ignore */ }
+}
+
+// 核心调度器 - 修复版
+function strumScheduler() {
+    if (!strumRunning) return;
+    const patterns = getPatterns();
+    const keys = Object.keys(patterns);
+    const currentKey = keys[strumCurrentPatternIdx] || keys[0];
+    const pattern = patterns[currentKey];
+    if (!pattern) { strumRunning = false; return; }
+    const totalBeats = pattern.beats || 4;
+    const bpm = strumSpeed;
+    const interval = 60000 / bpm;
+
+    // 1. 移动到下一拍
+    strumCurrentBeat = (strumCurrentBeat + 1) % totalBeats;
+    
+    // 2. 渲染当前拍（显示绿框）
+    renderBeatGrid();
+    renderRefDiagram();
+    
+    // 3. 播放当前拍声音
+    playStrumClick();
+
+    // 4. 设置下一次定时器
+    strumTimer = setTimeout(strumScheduler, interval);
+}
+
+if (strumSpeedApplyBtn && strumSpeedInput) {
+    strumSpeedApplyBtn.addEventListener('click', function() {
+        let val = parseInt(strumSpeedInput.value);
+        if (isNaN(val) || val < 30) val = 30;
+        if (val > 240) val = 240;
+        strumSpeedInput.value = val;
+        strumSpeed = val;
+        if (strumRunning) {
+            clearTimeout(strumTimer);
+            strumRunning = false;
+            strumRunning = true;
+            strumCurrentBeat = 0;
+            renderBeatGrid();
+            renderRefDiagram();
+            if (soundEnabled) playStrumClick();
+            strumTimer = setTimeout(strumScheduler, 60000 / strumSpeed);
+        }
+    });
+    strumSpeedInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            strumSpeedApplyBtn.click();
+        }
+    });
+}
+
+if (strumStartBtn) {
+    strumStartBtn.addEventListener('click', function() {
+        if (strumRunning) return;
+        if (soundEnabled && !strumAudioCtx) {
+            strumAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            window.strumCtx = strumAudioCtx;
+        }
+        if (soundEnabled && strumAudioCtx && strumAudioCtx.state === 'suspended') {
+            strumAudioCtx.resume();
+        }
+        strumRunning = true;
+        strumCurrentBeat = 0;
+        strumStartBtn.textContent = '▶ 训练中';
+        strumStartBtn.disabled = true;
+        
+        // 1. 显示第1拍
+        renderBeatGrid();
+        renderRefDiagram();
+        
+        // 2. 播放第1拍声音
+        if (soundEnabled) playStrumClick();
+        
+        // 3. 设置定时器，下一拍从第2拍开始
+        strumTimer = setTimeout(strumScheduler, 60000 / strumSpeed);
+    });
+}
+
+function stopStrumTrainer() {
+    strumRunning = false;
+    if (strumTimer) { clearTimeout(strumTimer); strumTimer = null; }
+    if (strumStartBtn) {
+        strumStartBtn.textContent = '▶ 开始';
+        strumStartBtn.disabled = false;
+    }
+    strumCurrentBeat = 0;
+    if (strumBeatGrid) {
+        document.querySelectorAll('.strum-beat-cell').forEach(c => c.classList.remove('active'));
+    }
+    renderRefDiagram();
+    renderBeatGrid();
+    if (strumAudioCtx && strumAudioCtx.state !== 'closed') {
+        try { strumAudioCtx.close(); } catch(e) {}
+        strumAudioCtx = null;
+        window.strumCtx = null;
+    }
+}
+window.strumStop = stopStrumTrainer;
+
+if (strumStopBtn) {
+    strumStopBtn.addEventListener('click', stopStrumTrainer);
+}
+
+function initStrumTrainer() {
+    renderPatternGrid();
+    strumCurrentBeat = 0;
+    updateStrumDisplay();
+    if (strumSpeedInput) strumSpeedInput.value = strumSpeed;
+}
+
+// ============================================================
+// 初始化
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+    document.getElementById('menuPage').classList.add('active');
+    setTimeout(() => {
+        loadChords();
+        initStrumTrainer();
+    }, 50);
+});
+</script>
+
+</body>
+</html>
