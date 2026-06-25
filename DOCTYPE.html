@@ -1315,7 +1315,7 @@ function renderChordBox(diagramStr, chordName, label = '') {
     }
     const fretCount = Math.max(3, Math.min(6, maxFret - startFret + 3));
     let lines = [];
-    // 不再显示顶部的和弦名和把位
+    // 不显示标题行，不显示顶部弦号
     
     for (let f = 0; f < fretCount; f++) {
         const fretNum = startFret + f;
@@ -1331,19 +1331,20 @@ function renderChordBox(diagramStr, chordName, label = '') {
         for (let s = 0; s < 6; s++) {
             const ch = chars[s] || ' ';
             if (fretNum === 0) {
-                // 不显示 x 和 o，只用空格代替
-                if (ch === 'x') line += '  ';
-                else if (ch === '0') line += '  ';
-                else if (!isNaN(parseInt(ch)) && parseInt(ch) > 0) line += '● ';
-                else line += '  ';
+                // 第0品统一显示为空格
+                line += '  ';
             } else {
                 const num = parseInt(ch);
-                if (!isNaN(num) && num === fretNum) line += '● ';
-                else line += '│ ';
+                if (!isNaN(num) && num === fretNum) {
+                    line += '● ';
+                } else {
+                    line += '│ ';
+                }
             }
         }
         lines.push(line);
     }
+    // 只在底部显示弦号
     lines.push('   6 5 4 3 2 1');
     return lines.join('\n');
 }
