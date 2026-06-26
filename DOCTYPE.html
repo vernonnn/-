@@ -1479,23 +1479,40 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-// 3. 扫弦训练器 - 包含常用节奏型 1、2、3
+// 3. 扫弦训练器 - 直接控制格子内容
 // ============================================================
 const STRUM_PATTERNS_4 = {
     '常用节奏型 1': {
         name: '常用节奏型 1',
         beats: 4,
-        pattern: ['⬇', '⬇⬇⬆', '⬇', '⬇⬇⬆'],
+        // 每个拍子用 4 个值表示 4 个格子的状态
+        // 'down' = 下(↑), 'up' = 上(↓), null = 空
+        pattern: [
+            ['down', null, null, null],   // 第1拍：四分
+            ['down', null, 'down', 'up'], // 第2拍：前八后十六（下 空 下 上）
+            ['down', null, null, null],   // 第3拍：四分
+            ['down', null, 'down', 'up']  // 第4拍：前八后十六（下 空 下 上）
+        ],
     },
     '常用节奏型 2': {
         name: '常用节奏型 2',
         beats: 4,
-        pattern: ['⬇⬇', '⬇⬇⬆', '⬇⬇', '⬇⬇⬆'],
+        pattern: [
+            ['down', null, 'down', null], // 第1拍：八分（下 空 下 空）
+            ['down', null, 'down', 'up'], // 第2拍：前八后十六（下 空 下 上）
+            ['down', null, 'down', null], // 第3拍：八分（下 空 下 空）
+            ['down', null, 'down', 'up']  // 第4拍：前八后十六（下 空 下 上）
+        ],
     },
     '常用节奏型 3': {
         name: '常用节奏型 3',
         beats: 4,
-        pattern: ['⬇', '⬇⬆⬇', '⬇⬇⬆', '⬇⬆⬇'],
+        pattern: [
+            ['down', null, null, null],   // 第1拍：四分
+            ['down', null, 'down', 'up'], // 第2拍：前八后十六（下 空 下 上）
+            ['down', 'up', 'down', null], // 第3拍：前十六后八（下 上 下 空）
+            ['down', null, 'down', 'up']  // 第4拍：前八后十六（下 空 下 上）
+        ],
     }
 };
 
@@ -1612,22 +1629,23 @@ function renderRefDiagram() {
 
     // --- 如果当前节奏型没有对应的图片，则显示文字箭头（备用） ---
     let html = '';
-    pattern.pattern.forEach((item, i) => {
-        const isDown = item.includes('⬇');
-        const isUp = item.includes('⬆');
-        let cls = '';
-        if (isDown && isUp) cls = 'both';
-        else if (isDown) cls = 'down';
-        else if (isUp) cls = 'up';
+    // 这里 pattern 是二维数组，需要特殊处理显示
+    const patternData = pattern.pattern || [];
+    patternData.forEach((beat, i) => {
+        const displayText = beat.map(slot => {
+            if (slot === 'down') return '⬇';
+            if (slot === 'up') return '⬆';
+            return '·';
+        }).join('');
         const isActive = (i === strumCurrentBeat % pattern.beats && strumRunning);
-        html += `<span class="${cls}${isActive ? ' highlight' : ''}">${item}</span> `;
+        html += `<span class="${isActive ? ' highlight' : ''}">${displayText}</span> `;
     });
     html += `<span style="color:#5d7397;font-size:0.75rem;margin-left:10px;">▼ 参考节奏图</span>`;
     strumRefDiagram.innerHTML = html;
 }
 
 // ============================================================
-// 核心：renderBeatGrid - 4格节奏可视化（最终修正版）
+// renderBeatGrid - 直接读取 pattern 数组渲染
 // ============================================================
 function renderBeatGrid() {
     if (!strumBeatGrid) return;
@@ -1641,84 +1659,9 @@ function renderBeatGrid() {
     strumBeatGrid.className = 'strum-beat-grid time-4';
     strumBeatGrid.innerHTML = '';
 
-    // --- 核心解析函数：将箭头字符串映射到4个格子的状态 ---
-function parsePatternItem(item) {
-    // 初始化为4个空格
-    const slots = [
-        { active: false, type: 'empty', label: '' },
-        { active: false, type: 'empty', label: '' },
-        { active: false, type: 'empty', label: '' },
-        { active: false, type: 'empty', label: '' }
-    ];
-
-    if (!item) return slots;
-
-    const arrows = item.split('');
-    const totalArrows = arrows.length;
-
-    // --- 1. 四分音符 (1个箭头) ---
-    if (totalArrows === 1) {
-        if (arrows[0] === '⬇') slots[0] = { active: true, type: 'down', label: '下' };
-        else if (arrows[0] === '⬆') slots[0] = { active: true, type: 'up', label: '上' };
-        return slots;
-    }
-
-    // --- 2. 八分音符 (2个箭头) ---
-    if (totalArrows === 2) {
-        if (arrows[0] === '⬇') slots[0] = { active: true, type: 'down', label: '下' };
-        else if (arrows[0] === '⬆') slots[0] = { active: true, type: 'up', label: '上' };
-        if (arrows[1] === '⬇') slots[2] = { active: true, type: 'down', label: '下' };
-        else if (arrows[1] === '⬆') slots[2] = { active: true, type: 'up', label: '上' };
-        return slots;
-    }
-
-    // --- 3. 三个箭头 (前八后十六 或 前十六后八) ---
-    if (totalArrows === 3) {
-        function toSlot(arrow) {
-            if (arrow === '⬇') return { active: true, type: 'down', label: '下' };
-            if (arrow === '⬆') return { active: true, type: 'up', label: '上' };
-            return { active: false, type: 'empty', label: '' };
-        }
-
-        // 获取箭头类型
-        const type1 = arrows[0] === '⬇' ? 'down' : (arrows[0] === '⬆' ? 'up' : null);
-        const type2 = arrows[1] === '⬇' ? 'down' : (arrows[1] === '⬆' ? 'up' : null);
-        const type3 = arrows[2] === '⬇' ? 'down' : (arrows[2] === '⬆' ? 'up' : null);
-
-        // ---- 核心判断逻辑 ----
-        // 前八后十六（⬇⬇⬆ 或 ⬆⬆⬇）：第2和第3个箭头类型不同
-        // 前十六后八（⬆⬇⬆ 或 ⬇⬆⬇）：第2和第3个箭头类型相同
-
-        // 情况 A：前八后十六（type2 !== type3）
-        if (type2 !== null && type3 !== null && type2 !== type3) {
-            // ⬇⬇⬆ 显示为：下 · 下 · 上
-            slots[0] = toSlot(arrows[0]);  // 第1格：第一个箭头
-            // 第2格保持为空
-            slots[2] = toSlot(arrows[2]);  // 第3格：第三个箭头
-            slots[3] = toSlot(arrows[1]);  // 第4格：第二个箭头
-        }
-        // 情况 B：前十六后八（type2 === type3）
-        else if (type2 !== null && type3 !== null && type2 === type3) {
-            // ⬆⬇⬆ 显示为：下 · 上 · 下 · 空
-            slots[0] = toSlot(arrows[0]);  // 第1格：第一个箭头
-            slots[1] = toSlot(arrows[1]);  // 第2格：第二个箭头
-            slots[2] = toSlot(arrows[2]);  // 第3格：第三个箭头
-            // 第4格保持为空
-        }
-        // 兜底：如果判断失败，按顺序放前3格
-        else {
-            slots[0] = toSlot(arrows[0]);
-            slots[1] = toSlot(arrows[1]);
-            slots[2] = toSlot(arrows[2]);
-        }
-    }
-    return slots;
-}
-
-    // --- 渲染每个拍子 ---
+    // 渲染每个拍子
     for (let i = 0; i < totalBeats; i++) {
-        const item = pattern.pattern[i] || '⬇';
-        const slots = parsePatternItem(item);
+        const slots = pattern.pattern[i] || ['down', null, null, null];
         const isActive = (i === strumCurrentBeat % totalBeats && strumRunning);
 
         const cell = document.createElement('div');
@@ -1761,29 +1704,27 @@ function parsePatternItem(item) {
             const textSpan = document.createElement('div');
             textSpan.style.cssText = 'font-size: 0.5rem; margin-top: 1px; color: #7a8fb0;';
 
-            if (slot.active) {
-                if (slot.type === 'down') {
-                    slotDiv.style.background = 'rgba(245, 200, 66, 0.25)';
-                    slotDiv.style.borderColor = '#f5c842';
-                    arrowSpan.textContent = '↑';
-                    arrowSpan.style.color = '#f5c842';
-                    textSpan.textContent = '下';
-                    textSpan.style.color = '#f5c842';
-                } else if (slot.type === 'up') {
-                    slotDiv.style.background = 'rgba(106, 200, 255, 0.25)';
-                    slotDiv.style.borderColor = '#6ac8ff';
-                    arrowSpan.textContent = '↓';
-                    arrowSpan.style.color = '#6ac8ff';
-                    textSpan.textContent = '上';
-                    textSpan.style.color = '#6ac8ff';
-                }
+            if (slot === 'down') {
+                slotDiv.style.background = 'rgba(245, 200, 66, 0.25)';
+                slotDiv.style.borderColor = '#f5c842';
+                arrowSpan.textContent = '↑';
+                arrowSpan.style.color = '#f5c842';
+                textSpan.textContent = '下';
+                textSpan.style.color = '#f5c842';
+            } else if (slot === 'up') {
+                slotDiv.style.background = 'rgba(106, 200, 255, 0.25)';
+                slotDiv.style.borderColor = '#6ac8ff';
+                arrowSpan.textContent = '↓';
+                arrowSpan.style.color = '#6ac8ff';
+                textSpan.textContent = '上';
+                textSpan.style.color = '#6ac8ff';
             } else {
                 arrowSpan.textContent = '·';
                 arrowSpan.style.color = '#2a3a4a';
                 textSpan.textContent = '';
             }
 
-            if (isActive && slot.active) {
+            if (isActive && slot !== null) {
                 slotDiv.style.boxShadow = '0 0 12px rgba(74, 200, 74, 0.2)';
                 slotDiv.style.transform = 'scale(1.05)';
             }
@@ -1794,7 +1735,6 @@ function parsePatternItem(item) {
         });
 
         cell.appendChild(gridContainer);
-
         strumBeatGrid.appendChild(cell);
     }
 }
