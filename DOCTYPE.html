@@ -552,6 +552,7 @@
             margin-top: 2px;
         }
 
+        /* 参考节奏图区域 - 支持带文字水印的图片显示 */
         .strum-ref-diagram {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 12px;
@@ -559,12 +560,51 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             margin: 10px 0 14px;
             text-align: center;
-            font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
-            line-height: 2.2;
-            color: #b8d0ff;
             min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
+        .strum-ref-diagram .image-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            max-width: 100%;
+        }
+        .strum-ref-diagram img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            max-height: 150px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        /* 图片水印文字样式 */
+        .strum-ref-diagram .watermark {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.55);
+            padding: 2px 10px;
+            border-radius: 4px;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .strum-ref-diagram .watermark.top-left {
+            top: 8px;
+            left: 8px;
+        }
+        .strum-ref-diagram .watermark.top-right {
+            top: 8px;
+            right: 8px;
+        }
+        /* 文字箭头备用样式 */
         .strum-ref-diagram .down { color: #f5c842; font-weight: 700; }
         .strum-ref-diagram .up { color: #6ac8ff; font-weight: 700; }
         .strum-ref-diagram .both { color: #c8a030; font-weight: 700; }
@@ -600,6 +640,7 @@
         }
         .strum-speed-input:focus { border-color: #5f8ed0; }
 
+        /* 音量滑块样式 */
         .strum-sound-section {
             display: flex;
             align-items: center;
@@ -656,6 +697,42 @@
         .sound-status.on { color: #6ac86a; }
         .sound-status.off { color: #6a7a8a; }
 
+        #strumVolumeSlider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #2a3b55, #f5c842);
+            outline: none;
+            transition: 0.2s;
+            width: 80px;
+            cursor: pointer;
+        }
+        #strumVolumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #f5c842;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(245, 200, 66, 0.3);
+            border: 2px solid #fff;
+        }
+        #strumVolumeSlider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #f5c842;
+            cursor: pointer;
+            border: 2px solid #fff;
+        }
+        .volume-display {
+            color: #f5c842;
+            font-size: 0.85rem;
+            min-width: 32px;
+        }
+
         .strum-auto-section {
             margin: 10px 0;
             padding: 10px 14px;
@@ -670,6 +747,7 @@
         }
         .strum-auto-section .label .highlight-text { color: #4ac84a; font-weight: 600; }
 
+        /* ===== 节奏网格（4格可视化） ===== */
         .strum-beat-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -683,7 +761,7 @@
             border: 2px solid rgba(255, 255, 255, 0.06);
             text-align: center;
             transition: 0.15s;
-            min-height: 60px;
+            min-height: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -692,22 +770,16 @@
         .strum-beat-cell .beat-label {
             font-size: 0.65rem;
             color: #5d7397;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
-        .strum-beat-cell .strum-dir {
-            font-size: 1.2rem;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-        .strum-beat-cell .strum-dir.down { color: #f5c842; }
-        .strum-beat-cell .strum-dir.up { color: #6ac8ff; }
-        .strum-beat-cell .strum-dir.both { color: #c8a030; }
         .strum-beat-cell.active {
             border-color: #4ac84a;
             box-shadow: 0 0 25px rgba(74, 200, 74, 0.2);
             background: rgba(74, 200, 74, 0.08);
         }
-        .strum-beat-cell.active .beat-label { color: #4ac84a; }
+        .strum-beat-cell.active .beat-label {
+            color: #4ac84a;
+        }
 
         .strum-controls {
             display: flex;
@@ -748,6 +820,11 @@
             .sound-toggle { width: 40px; height: 22px; }
             .sound-toggle .slider { width: 16px; height: 16px; }
             .sound-toggle.active .slider { left: 20px; }
+            #strumVolumeSlider { width: 60px; }
+            .strum-ref-diagram img { max-height: 100px; }
+            .strum-ref-diagram .watermark { font-size: 0.6rem; padding: 1px 6px; }
+            .strum-ref-diagram .watermark.top-left { top: 4px; left: 4px; }
+            .strum-ref-diagram .watermark.top-right { top: 4px; right: 4px; }
         }
         @media (max-width: 400px) {
             .chord-results { grid-template-columns: 1fr; }
@@ -861,7 +938,7 @@
         </div>
     </div>
 
-    <!-- ===== 扫弦训练器（修复版） ===== -->
+    <!-- ===== 扫弦训练器 ===== -->
     <div class="page" id="strumPage">
         <div class="page-header">
             <button class="btn-back" onclick="navigateTo('menu')">← 返回</button>
@@ -877,6 +954,7 @@
 
             <div class="strum-pattern-grid" id="strumPatternGrid"></div>
 
+            <!-- 参考节奏图区域 -->
             <div class="strum-ref-diagram" id="strumRefDiagram">
                 <span class="down">⬇</span> <span class="up">⬆</span> <span class="down">⬇</span> <span class="up">⬆</span>
                 <span style="color:#5d7397;font-size:0.75rem;margin-left:10px;">▼ 参考节奏图</span>
@@ -889,13 +967,17 @@
                 <button class="btn btn-primary" id="strumSpeedApplyBtn" style="padding:6px 18px;font-size:0.85rem;">应用</button>
             </div>
 
-            <!-- 声音开关 -->
+            <!-- 声音开关 + 音量控制 -->
             <div class="strum-sound-section">
                 <label>🔊 声音</label>
                 <div class="sound-toggle active" id="soundToggle">
                     <div class="slider"></div>
                 </div>
                 <span class="sound-status on" id="soundStatus">开启</span>
+
+                <label style="margin-left:12px; color:#7a8fb0; font-size:0.85rem;">音量</label>
+                <input type="range" id="strumVolumeSlider" min="0" max="100" value="80" />
+                <span class="volume-display" id="strumVolumeDisplay">80%</span>
             </div>
 
             <div class="strum-auto-section">
@@ -903,6 +985,7 @@
                     🎯 手动切换节奏型 · 点击上方切换
                     <span style="margin-left:12px;" class="highlight-text">绿框走到哪一格，右手就做哪一格</span>
                 </div>
+                <!-- 4格节奏可视化网格 -->
                 <div class="strum-beat-grid time-4" id="strumBeatGrid"></div>
             </div>
 
@@ -1396,20 +1479,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================================
-// 3. 扫弦训练器 - 彻底修复版
+// 3. 扫弦训练器 - 包含常用节奏型 1、2、3
 // ============================================================
 const STRUM_PATTERNS_4 = {
     '常用节奏型 1': {
         name: '常用节奏型 1',
         beats: 4,
         pattern: ['⬇', '⬇⬇⬆', '⬇', '⬇⬇⬆'],
-        display: ['四分', '前八后十六', '四分', '前八后十六']
     },
     '常用节奏型 2': {
         name: '常用节奏型 2',
         beats: 4,
         pattern: ['⬇⬇', '⬇⬇⬆', '⬇⬇', '⬇⬇⬆'],
-        display: ['八分', '前八后十六', '八分', '前八后十六']
+    },
+    '常用节奏型 3': {
+        name: '常用节奏型 3',
+        beats: 4,
+        pattern: ['⬇', '⬇⬆⬇', '⬇⬇⬆', '⬇⬆⬇'],
     }
 };
 
@@ -1420,6 +1506,7 @@ let strumCurrentPatternIdx = 0;
 let strumSpeed = 70;
 let strumAudioCtx = null;
 let soundEnabled = true;
+let strumVolume = 0.8;
 window.strumCtx = strumAudioCtx;
 
 const strumPatternGrid = document.getElementById('strumPatternGrid');
@@ -1427,7 +1514,6 @@ const strumRefDiagram = document.getElementById('strumRefDiagram');
 const strumBeatGrid = document.getElementById('strumBeatGrid');
 const strumStartBtn = document.getElementById('strumStartBtn');
 const strumStopBtn = document.getElementById('strumStopBtn');
-const strumCurrentPattern = document.getElementById('strumCurrentPattern');
 const strumSpeedInput = document.getElementById('strumSpeedInput');
 const strumSpeedApplyBtn = document.getElementById('strumSpeedApplyBtn');
 
@@ -1441,6 +1527,17 @@ soundToggle.addEventListener('click', function() {
     soundStatus.textContent = soundEnabled ? '开启' : '关闭';
     soundStatus.className = 'sound-status ' + (soundEnabled ? 'on' : 'off');
 });
+
+// 音量滑块控制
+const volumeSlider = document.getElementById('strumVolumeSlider');
+const volumeDisplay = document.getElementById('strumVolumeDisplay');
+
+if (volumeSlider) {
+    volumeSlider.addEventListener('input', function() {
+        strumVolume = parseInt(this.value) / 100;
+        volumeDisplay.textContent = Math.round(strumVolume * 100) + '%';
+    });
+}
 
 function getPatterns() {
     return STRUM_PATTERNS_4;
@@ -1463,10 +1560,9 @@ function renderPatternGrid() {
                 clearTimeout(strumTimer);
                 strumRunning = false;
                 strumRunning = true;
-                // 立即显示第1拍并播放
                 renderBeatGrid();
                 renderRefDiagram();
-                if (soundEnabled) playStrumClick();
+                if (soundEnabled) playStrumClick(true);
                 strumTimer = setTimeout(strumScheduler, 60000 / strumSpeed);
             } else {
                 updateStrumDisplay();
@@ -1483,6 +1579,38 @@ function renderRefDiagram() {
     const currentKey = keys[strumCurrentPatternIdx] || keys[0];
     const pattern = patterns[currentKey];
     if (!pattern) return;
+
+    // --- 定义图片链接和对应的右上角文字 ---
+    const imageConfig = {
+        '常用节奏型 1': {
+            url: 'https://raw.githubusercontent.com/vernonnn/-/main/d9700341-77d2-44f1-9309-401440a5ba41.jpg',
+            label: '常用节奏1参考图'
+        },
+        '常用节奏型 2': {
+            url: 'https://raw.githubusercontent.com/vernonnn/-/main/8a7328ef-f6fc-430c-8d9b-78c37a0d0ca2.jpg',
+            label: '常用节奏2参考图'
+        },
+        '常用节奏型 3': {
+            url: 'https://raw.githubusercontent.com/vernonnn/-/main/5aae1d91-2d2b-4464-bd59-479761ef724b.jpg',
+            label: '常用节奏3参考图'
+        }
+    };
+
+    const config = imageConfig[currentKey];
+
+    if (config) {
+        // 显示带有水印的图片
+        strumRefDiagram.innerHTML = `
+            <div class="image-wrapper">
+                <img src="${config.url}" alt="${currentKey} 参考图" />
+                <span class="watermark top-left">参考节奏图</span>
+                <span class="watermark top-right">${config.label}</span>
+            </div>
+        `;
+        return;
+    }
+
+    // --- 如果当前节奏型没有对应的图片，则显示文字箭头（备用） ---
     let html = '';
     pattern.pattern.forEach((item, i) => {
         const isDown = item.includes('⬇');
@@ -1494,10 +1622,13 @@ function renderRefDiagram() {
         const isActive = (i === strumCurrentBeat % pattern.beats && strumRunning);
         html += `<span class="${cls}${isActive ? ' highlight' : ''}">${item}</span> `;
     });
-    html += `<span style="color:#5d7397;font-size:0.75rem;margin-left:10px;">▼ ${pattern.display ? pattern.display.join(' | ') : ''}</span>`;
+    html += `<span style="color:#5d7397;font-size:0.75rem;margin-left:10px;">▼ 参考节奏图</span>`;
     strumRefDiagram.innerHTML = html;
 }
 
+// ============================================================
+// 核心：renderBeatGrid - 4格节奏可视化（最终修正版）
+// ============================================================
 function renderBeatGrid() {
     if (!strumBeatGrid) return;
     const patterns = getPatterns();
@@ -1510,36 +1641,159 @@ function renderBeatGrid() {
     strumBeatGrid.className = 'strum-beat-grid time-4';
     strumBeatGrid.innerHTML = '';
 
-    for (let i = 0; i < totalBeats; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'strum-beat-cell';
-        if (i === strumCurrentBeat % totalBeats && strumRunning) {
-            cell.classList.add('active');
+    // --- 核心解析函数：将箭头字符串映射到4个格子的状态 ---
+function parsePatternItem(item) {
+    // 初始化为4个空格
+    const slots = [
+        { active: false, type: 'empty', label: '' },
+        { active: false, type: 'empty', label: '' },
+        { active: false, type: 'empty', label: '' },
+        { active: false, type: 'empty', label: '' }
+    ];
+
+    if (!item) return slots;
+
+    const arrows = item.split('');
+    const totalArrows = arrows.length;
+
+    // --- 1. 四分音符 (1个箭头) ---
+    if (totalArrows === 1) {
+        if (arrows[0] === '⬇') slots[0] = { active: true, type: 'down', label: '下' };
+        else if (arrows[0] === '⬆') slots[0] = { active: true, type: 'up', label: '上' };
+        return slots;
+    }
+
+    // --- 2. 八分音符 (2个箭头) ---
+    if (totalArrows === 2) {
+        if (arrows[0] === '⬇') slots[0] = { active: true, type: 'down', label: '下' };
+        else if (arrows[0] === '⬆') slots[0] = { active: true, type: 'up', label: '上' };
+        if (arrows[1] === '⬇') slots[2] = { active: true, type: 'down', label: '下' };
+        else if (arrows[1] === '⬆') slots[2] = { active: true, type: 'up', label: '上' };
+        return slots;
+    }
+
+    // --- 3. 三个箭头 (前八后十六 或 前十六后八) ---
+    if (totalArrows === 3) {
+        function toSlot(arrow) {
+            if (arrow === '⬇') return { active: true, type: 'down', label: '下' };
+            if (arrow === '⬆') return { active: true, type: 'up', label: '上' };
+            return { active: false, type: 'empty', label: '' };
         }
 
+        // 获取箭头类型
+        const type1 = arrows[0] === '⬇' ? 'down' : (arrows[0] === '⬆' ? 'up' : null);
+        const type2 = arrows[1] === '⬇' ? 'down' : (arrows[1] === '⬆' ? 'up' : null);
+        const type3 = arrows[2] === '⬇' ? 'down' : (arrows[2] === '⬆' ? 'up' : null);
+
+        // ---- 核心判断逻辑 ----
+        // 前八后十六（⬇⬇⬆ 或 ⬆⬆⬇）：第2和第3个箭头类型不同
+        // 前十六后八（⬆⬇⬆ 或 ⬇⬆⬇）：第2和第3个箭头类型相同
+
+        // 情况 A：前八后十六（type2 !== type3）
+        if (type2 !== null && type3 !== null && type2 !== type3) {
+            // ⬇⬇⬆ 显示为：下 · 下 · 上
+            slots[0] = toSlot(arrows[0]);  // 第1格：第一个箭头
+            // 第2格保持为空
+            slots[2] = toSlot(arrows[2]);  // 第3格：第三个箭头
+            slots[3] = toSlot(arrows[1]);  // 第4格：第二个箭头
+        }
+        // 情况 B：前十六后八（type2 === type3）
+        else if (type2 !== null && type3 !== null && type2 === type3) {
+            // ⬆⬇⬆ 显示为：下 · 上 · 下 · 空
+            slots[0] = toSlot(arrows[0]);  // 第1格：第一个箭头
+            slots[1] = toSlot(arrows[1]);  // 第2格：第二个箭头
+            slots[2] = toSlot(arrows[2]);  // 第3格：第三个箭头
+            // 第4格保持为空
+        }
+        // 兜底：如果判断失败，按顺序放前3格
+        else {
+            slots[0] = toSlot(arrows[0]);
+            slots[1] = toSlot(arrows[1]);
+            slots[2] = toSlot(arrows[2]);
+        }
+    }
+    return slots;
+}
+
+    // --- 渲染每个拍子 ---
+    for (let i = 0; i < totalBeats; i++) {
+        const item = pattern.pattern[i] || '⬇';
+        const slots = parsePatternItem(item);
+        const isActive = (i === strumCurrentBeat % totalBeats && strumRunning);
+
+        const cell = document.createElement('div');
+        cell.className = 'strum-beat-cell';
+        if (isActive) cell.classList.add('active');
+
+        // 拍号标签
         const label = document.createElement('div');
         label.className = 'beat-label';
         label.textContent = `第${i+1}拍`;
         cell.appendChild(label);
 
-        const dir = document.createElement('div');
-        const item = pattern.pattern[i] || '⬇';
-        const isDown = item.includes('⬇');
-        const isUp = item.includes('⬆');
-        let cls = 'strum-dir';
-        if (isDown && isUp) cls += ' both';
-        else if (isDown) cls += ' down';
-        else if (isUp) cls += ' up';
-        dir.className = cls;
-        dir.textContent = item;
-        cell.appendChild(dir);
+        // 4格容器
+        const gridContainer = document.createElement('div');
+        gridContainer.style.cssText = 'display:grid; grid-template-columns:repeat(4,1fr); gap:4px; width:100%; margin:4px 0;';
 
-        if (pattern.display && pattern.display[i]) {
-            const sub = document.createElement('div');
-            sub.style.cssText = 'font-size:0.5rem;color:#5d7397;margin-top:2px;';
-            sub.textContent = pattern.display[i];
-            cell.appendChild(sub);
-        }
+        slots.forEach((slot, idx) => {
+            const slotDiv = document.createElement('div');
+            slotDiv.style.cssText = `
+                aspect-ratio: 1;
+                border-radius: 4px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.06);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+                font-weight: 700;
+                transition: all 0.15s;
+                min-height: 30px;
+                color: #3a4a5a;
+            `;
+
+            // 箭头显示
+            const arrowSpan = document.createElement('div');
+            arrowSpan.style.cssText = 'font-size: 1rem; line-height: 1.2;';
+
+            // 文字显示（在箭头下方）
+            const textSpan = document.createElement('div');
+            textSpan.style.cssText = 'font-size: 0.5rem; margin-top: 1px; color: #7a8fb0;';
+
+            if (slot.active) {
+                if (slot.type === 'down') {
+                    slotDiv.style.background = 'rgba(245, 200, 66, 0.25)';
+                    slotDiv.style.borderColor = '#f5c842';
+                    arrowSpan.textContent = '↑';
+                    arrowSpan.style.color = '#f5c842';
+                    textSpan.textContent = '下';
+                    textSpan.style.color = '#f5c842';
+                } else if (slot.type === 'up') {
+                    slotDiv.style.background = 'rgba(106, 200, 255, 0.25)';
+                    slotDiv.style.borderColor = '#6ac8ff';
+                    arrowSpan.textContent = '↓';
+                    arrowSpan.style.color = '#6ac8ff';
+                    textSpan.textContent = '上';
+                    textSpan.style.color = '#6ac8ff';
+                }
+            } else {
+                arrowSpan.textContent = '·';
+                arrowSpan.style.color = '#2a3a4a';
+                textSpan.textContent = '';
+            }
+
+            if (isActive && slot.active) {
+                slotDiv.style.boxShadow = '0 0 12px rgba(74, 200, 74, 0.2)';
+                slotDiv.style.transform = 'scale(1.05)';
+            }
+
+            slotDiv.appendChild(arrowSpan);
+            slotDiv.appendChild(textSpan);
+            gridContainer.appendChild(slotDiv);
+        });
+
+        cell.appendChild(gridContainer);
 
         strumBeatGrid.appendChild(cell);
     }
@@ -1548,13 +1802,6 @@ function renderBeatGrid() {
 function updateStrumDisplay() {
     renderRefDiagram();
     renderBeatGrid();
-    const patterns = getPatterns();
-    const keys = Object.keys(patterns);
-    const currentKey = keys[strumCurrentPatternIdx] || keys[0];
-    const pattern = patterns[currentKey];
-    if (pattern && strumCurrentPattern) {
-        strumCurrentPattern.textContent = pattern.name;
-    }
 }
 
 function playStrumClick(isAccent) {
@@ -1568,41 +1815,33 @@ function playStrumClick(isAccent) {
             strumAudioCtx.resume();
         }
 
-        // 重拍（第1拍）：清脆的方波
+        // 音量基数提升一倍
         if (isAccent) {
             const osc = strumAudioCtx.createOscillator();
             const gain = strumAudioCtx.createGain();
             osc.connect(gain);
             gain.connect(strumAudioCtx.destination);
-            
-            // 方波 = 清脆、明亮
             osc.type = 'square';
             osc.frequency.value = 1000;
-            gain.gain.setValueAtTime(0.35, strumAudioCtx.currentTime);
+            gain.gain.setValueAtTime(0.70 * strumVolume, strumAudioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, strumAudioCtx.currentTime + 0.04);
-            
             osc.start();
             osc.stop(strumAudioCtx.currentTime + 0.04);
-        } 
-        // 弱拍（2~4拍）：柔和的纯音
-        else {
+        } else {
             const osc = strumAudioCtx.createOscillator();
             const gain = strumAudioCtx.createGain();
             osc.connect(gain);
             gain.connect(strumAudioCtx.destination);
-            
             osc.type = 'sine';
             osc.frequency.value = 660;
-            gain.gain.setValueAtTime(0.15, strumAudioCtx.currentTime);
+            gain.gain.setValueAtTime(0.30 * strumVolume, strumAudioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, strumAudioCtx.currentTime + 0.06);
-            
             osc.start();
             osc.stop(strumAudioCtx.currentTime + 0.06);
         }
     } catch (e) { /* ignore */ }
 }
 
-// 核心调度器 - 修复版
 function strumScheduler() {
     if (!strumRunning) return;
     const patterns = getPatterns();
@@ -1614,17 +1853,13 @@ function strumScheduler() {
     const bpm = strumSpeed;
     const interval = 60000 / bpm;
 
-    // 1. 移动到下一拍
     strumCurrentBeat = (strumCurrentBeat + 1) % totalBeats;
-    
-    // 2. 渲染当前拍（显示绿框）
     renderBeatGrid();
     renderRefDiagram();
     
-    // 3. 播放当前拍声音
-    playStrumClick();
+    const isAccent = (strumCurrentBeat === 0);
+    playStrumClick(isAccent);
 
-    // 4. 设置下一次定时器
     strumTimer = setTimeout(strumScheduler, interval);
 }
 
@@ -1642,7 +1877,7 @@ if (strumSpeedApplyBtn && strumSpeedInput) {
             strumCurrentBeat = 0;
             renderBeatGrid();
             renderRefDiagram();
-            if (soundEnabled) playStrumClick();
+            if (soundEnabled) playStrumClick(true);
             strumTimer = setTimeout(strumScheduler, 60000 / strumSpeed);
         }
     });
@@ -1668,14 +1903,9 @@ if (strumStartBtn) {
         strumStartBtn.textContent = '▶ 训练中';
         strumStartBtn.disabled = true;
         
-        // 1. 显示第1拍
         renderBeatGrid();
         renderRefDiagram();
-        
-        // 2. 播放第1拍声音
-        if (soundEnabled) playStrumClick();
-        
-        // 3. 设置定时器，下一拍从第2拍开始
+        if (soundEnabled) playStrumClick(true);
         strumTimer = setTimeout(strumScheduler, 60000 / strumSpeed);
     });
 }
